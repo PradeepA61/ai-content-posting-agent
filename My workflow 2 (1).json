@@ -1,0 +1,449 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "socila-media-automation",
+        "responseMode": "lastNode",
+        "options": {
+          "ignoreBots": false,
+          "rawBody": false,
+          "responseCode": {
+            "values": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "74a6e551-3a70-4fb9-b06e-470db2664cad",
+      "name": "Webhook",
+      "webhookId": "1c9a60d1-9c91-4577-8efc-d3a6405225da"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Act as a professional Social Media Manager. I will provide a topic, and you must generate a full campaign.\n\nTopic: {{ $json.body.topic }}\n\nYour Output Requirement:\nYou MUST return your response as a valid JSON object only. Do not include any introductory text or markdown backticks. Use these exact keys:  \n\n'linkedin': A professional post.\n\n'facebook': A community-focused post.\n\n'instagram': An emoji-rich caption.\n\n'youtube': A detailed video description.\n\n'hashtags': 10 trending hashtags.\n\n'cta': A strong call to action.\n\n'image_prompt': A highly detailed visual description for Leonardo AI."
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {
+          "systemMessage": "You are a social media manager",
+          "maxOutputTokens": 2000,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "1014fda3-c24a-4d76-ae3e-0ef435345bc5",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "PcfqkfLOOu2g52NS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawData = $input.first().json.content.parts[0].text;\nconst parsedData = JSON.parse(rawData);\nreturn parsedData;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "b2c6d76a-d758-428e-bbb8-ed2436f9cfbd",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloudflare.com/client/v4/accounts/e979a303235ed167cf64f04209dd78f5/ai/run/@cf/bytedance/stable-diffusion-xl-lightning",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"prompt\": $json.image_prompt } }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        768,
+        0
+      ],
+      "id": "04118918-6ada-4624-9b98-16af23aecbea",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload?key=618233b1d40aafae5f746dc0c408adf0",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1136,
+        0
+      ],
+      "id": "76c183c1-858e-474c-a0fe-d71a6069f275",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        0
+      ],
+      "id": "8481e815-1ced-4a85-a5d9-70ef2d42c1b2",
+      "name": "Wait",
+      "webhookId": "a357dc3b-9e18-4537-9c5c-a033c70e2e92"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1VKXYSHzprx320fjqXdM0xxxmKJ1Y9kPeIgtk9Jxo4jU",
+          "mode": "list",
+          "cachedResultName": "Social media automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VKXYSHzprx320fjqXdM0xxxmKJ1Y9kPeIgtk9Jxo4jU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VKXYSHzprx320fjqXdM0xxxmKJ1Y9kPeIgtk9Jxo4jU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Topic": "={{ $json.Topic }}",
+            "Linkedin": "={{ $json.linkedin }}",
+            "Facebook": "={{ $json.facebook }}",
+            "Instagram": "={{ $json.instagram }}",
+            "Youtube": "={{ $json.youtube }}",
+            "Hashtag": "={{ $json['hashtags '] }}",
+            "CTA": "={{ $json.cta }}",
+            "Image_URL": "==IMAGE(\"{{ $('HTTP Request1').item.json.data.url }}\")"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Linkedin",
+              "displayName": "Linkedin",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Facebook",
+              "displayName": "Facebook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Instagram",
+              "displayName": "Instagram",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Youtube",
+              "displayName": "Youtube",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Hashtag",
+              "displayName": "Hashtag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CTA",
+              "displayName": "CTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Image_URL",
+              "displayName": "Image_URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1520,
+        0
+      ],
+      "id": "ef93d52e-d740-4be4-a278-2662d136f97e",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "uGXjkQzoAMZCrPUG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "57d1dd7b-b0e4-46e9-8add-cc414620a86d",
+              "name": "Topic",
+              "value": "={{ $('Webhook').item.json.body.topic }}",
+              "type": "string"
+            },
+            {
+              "id": "13239008-722f-4bda-bdcd-80d51a5cc970",
+              "name": "linkedin",
+              "value": "={{ $('HTTP Request').item.json.linkedin }}",
+              "type": "string"
+            },
+            {
+              "id": "272f1bdc-fe41-443b-9e67-0975177f2185",
+              "name": "facebook",
+              "value": "={{$('Code in JavaScript').item.json.facebook}}",
+              "type": "string"
+            },
+            {
+              "id": "0f27507f-5c46-4435-80a5-6d6533400a6a",
+              "name": "instagram",
+              "value": "={{$('Code in JavaScript').item.json.instagram}}",
+              "type": "string"
+            },
+            {
+              "id": "de505c2e-3ba1-47dc-b459-252d35715aa7",
+              "name": "youtube",
+              "value": "={{$('Code in JavaScript').item.json.youtube}}",
+              "type": "string"
+            },
+            {
+              "id": "4f019572-ce38-48d5-9526-d5e4a23f3481",
+              "name": "hashtags ",
+              "value": "={{$('Code in JavaScript').item.json.hashtags}}",
+              "type": "string"
+            },
+            {
+              "id": "ce0e8022-4914-47e4-b1f0-a8e140d9c9df",
+              "name": "cta",
+              "value": "= {{$('Code in JavaScript').item.json.cta}}",
+              "type": "string"
+            },
+            {
+              "id": "f5a14283-33be-4fb2-a341-86794a595e41",
+              "name": "image_url",
+              "value": "={{$json.data.image.url}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true,
+          "dotNotation": true
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        0
+      ],
+      "id": "3ed0f4d3-6e13-426b-ae87-09d5ab03a342",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1d42455d-7b57-40b0-9160-df87b015ac7e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "295dcbee545df13c2e828d3b9a28dc7e34d120de069f13f3039048a1b87fdd07"
+  },
+  "id": "ICO345dTKKCifwcD",
+  "tags": []
+}
